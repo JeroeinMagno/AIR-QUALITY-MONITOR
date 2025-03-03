@@ -1,5 +1,6 @@
 import dash
 from dash import dcc, html, Input, Output
+import dash_bootstrap_components as dbc
 import plotly.express as px
 import duckdb
 import pandas as pd
@@ -42,7 +43,8 @@ def map_figure():
             "latitude": True,
             "longitude": True,
             "datetime": True,
-            "pm25": True
+            "pm25": True,
+            
         },
         zoom=6.0
     )
@@ -148,7 +150,8 @@ def update_map(_):
             "latitude": True,
             "longitude": True,
             "datetime": True,
-            "pm25": True
+            "pm25": True,
+            
         },
         zoom=6.0
     )

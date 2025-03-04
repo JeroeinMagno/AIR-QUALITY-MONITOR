@@ -1,3 +1,30 @@
+
+# AIR QUALITY MONITOR
+
+## Project Overview
+
+This project monitors and visualizes air quality data using OpenAQ. It includes data extraction, transformation, and a Plotly Dash-based dashboard for interactive analysis.
+
+## Prerequisites
+
+Ensure you have the following installed:
+
+- Python (>=3.8)
+- pip
+- Virtual environment (optional but recommended)
+- OpenAQ API key (if required)
+
+## Installation Guide
+
+### 1. Clone the Repository
+
+Download the project to your local machine:
+
+```sh
+git clone https://github.com/JeroeinMagno/AIR-QUALITY-MONITOR.git
+cd AIR-QUALITY-MONITOR
+```
+
 # Project Structure
 
 ```
@@ -96,3 +123,18 @@ python transformation.py
   pip install --upgrade -r requirements.txt
   ```
 
+## Contributing
+
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature-branch`).
+3. Make your changes and commit (`git commit -m 'Description of changes'`).
+4. Push to the branch (`git push origin feature-branch`).
+5. Open a pull request.
+
+## License
+
+This project is licensed under the MIT License. See the `LICENSE` file for more details.
+
+## Contact
+
+For any issues, reach out through [GitHub Issues](https://github.com/JeroeinMagno/AIR-QUALITY-MONITOR/issues).

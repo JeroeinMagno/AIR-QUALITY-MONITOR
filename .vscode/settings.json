@@ -1,5 +1,6 @@
 {
     "cSpell.words": [
+        "borderwidth",
         "customdata",
         "dateutil",
         "fetchdf",
@@ -8,6 +9,9 @@
         "locationid",
         "mapbox",
         "openaq",
-        "relativedelta"
+        "relativedelta",
+        "Segoe",
+        "xanchor",
+        "yanchor"
     ]
 }

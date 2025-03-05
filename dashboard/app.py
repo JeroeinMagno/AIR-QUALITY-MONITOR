@@ -32,7 +32,7 @@ class AirQualityDashboard:
         # Rename columns to match expected names
         self.latest_values_df.rename(columns={"lat": "latitude", "lon": "longitude"}, inplace=True)
 
-    def create_map_figure(self):  # Fixed indentation - moved outside setup_initial_data
+    def create_map_figure(self):
         """Create the map figure with categorized PM2.5 values"""
         self.latest_values_df.fillna(0, inplace=True)
         
@@ -46,103 +46,207 @@ class AirQualityDashboard:
             else:
                 return "Unhealthy"
         
+        # Create color mapping dictionary
+        color_map = {
+            "Good": "#00E400",  # Green
+            "Moderate": "#FFAA1C",  # Orange
+            "Unhealthy for Sensitive Groups": "#FF7E00",  # Dark Orange
+            "Unhealthy": "#FF0000"  # Red
+        }
+        
+        # Add air quality status column
         self.latest_values_df["air_quality_status"] = self.latest_values_df["pm25"].apply(categorize_pm25)
         
+        # Create the scatter mapbox figure
         map_fig = px.scatter_mapbox(
-            self.latest_values_df,
-            lat="latitude",
-            lon="longitude",
-            hover_name="location",
-            hover_data={
-                "latitude": True,
-                "longitude": True,
-                "datetime": True,
-                "air_quality_status": True,
-            },
-            zoom=6.0
-        )
+        self.latest_values_df,
+        lat="latitude",
+        lon="longitude",
+        hover_name="location",
+        color="air_quality_status",
+        color_discrete_map=color_map,
+        hover_data={
+            "latitude": ":.4f",
+            "longitude": ":.4f",
+            "datetime": True,
+            "air_quality_status": True,
+            "pm25": ":.1f"
+        },
+        zoom=6.0,
+        size=[15] * len(self.latest_values_df),  # Set uniform size for all markers
+        size_max=15  # Increase maximum marker size
+    )
+        
+        # Update the layout with enhanced styling
         map_fig.update_layout(
-            mapbox_style="open-street-map",
-            height=800,
-            title="Air Quality Monitoring Locations"
-        )
+        mapbox_style="open-street-map",
+        height=800,           
+        legend_title={
+            'text': "Air Quality Status",
+            'font': {'size': 16, 'color': '#2c3e50'}
+        },
+        margin={'r': 0, 'l': 0, 'b': 0, 't': 40},
+        legend={
+            'x': 0.01,  # Move legend to the left
+            'y': 0.99,  # Keep at top
+            'xanchor': 'left',  # Anchor point on the left
+            'yanchor': 'top',   # Anchor point at top
+            'bgcolor': 'rgba(255, 255, 255, 0.8)',  # Semi-transparent white background
+            'bordercolor': '#2c3e50',  # Border color
+            'borderwidth': 1  # Border width
+        }
+    )
+        
         return map_fig
 
-
     def setup_layout(self):
-        """Setup the dashboard layout"""
+        """Setup the dashboard layout with enhanced styling"""
         self.app.layout = html.Div([
+            # Header with gradient background
+            html.Div([
+                html.H1(
+                    "Air Quality Monitoring Dashboard",
+                    className="text-center mb-4",
+                    style={
+                        'color': '#2c3e50',
+                        'fontWeight': 'bold',
+                        'fontSize': '2.5rem'
+                    }
+                ),
+                html.Hr(style={'borderColor': '#007bff'})
+            ], style={
+                'padding': '20px 0',
+                'background': 'linear-gradient(to right, #f8f9fa, #e9ecef)'
+            }),
+
+            # Main content
             dcc.Tabs([
+                # Map Tab
                 dcc.Tab(
-                    label="Sensor Locations",
-                    children=[dcc.Graph(id="map-view")],
+                    label="📍 Sensor Locations",
+                    children=[
+                        html.Div([
+                            html.H3(
+                                className="text-center mb-3",
+                                style={'color': '#2c3e50'}
+                            ),
+                            dcc.Graph(
+                                id="map-view",
+                                config={
+                                    'displayModeBar': True,
+                                    'scrollZoom': True,
+                                    'modeBarButtonsToRemove': ['select2d', 'lasso2d']
+                                }
+                            )
+                        ], className="p-4 shadow-sm")
+                    ],
                     style={
                         'backgroundColor': '#f8f9fa',
-                        'padding': '10px'
+                        'padding': '10px',
+                        'borderRadius': '5px'
                     },
                     selected_style={
                         'backgroundColor': '#e9ecef',
                         'padding': '10px',
-                        'borderTop': '3px solid #007bff'
+                        'borderTop': '3px solid #007bff',
+                        'borderRadius': '5px'
                     }
                 ),
+
+                # Parameters Tab with enhanced styling
                 dcc.Tab(
-                    label="Parameter Plots",
+                    label="📊 Parameter Analysis",
                     children=[
                         html.Div([
-                            html.Div([
-                                dcc.Dropdown(
-                                    id="location-dropdown",
-                                    clearable=False,
-                                    multi=False,
-                                    searchable=True,
-                                    options=self.df["location"].unique(),
-                                    value=self.df["location"].unique()[0],
-                                    style={'marginBottom': '10px'}
-                                ),
-                                dcc.Dropdown(
-                                    id="parameter-dropdown",
-                                    clearable=False,
-                                    multi=False,
-                                    searchable=True,
-                                    options=self.df["parameter"].unique(),
-                                    value=self.df["parameter"].unique()[0],
-                                    style={'marginBottom': '10px'}
-                                ),
-                                dcc.DatePickerRange(
-                                    id="date-picker-range",
-                                    display_format="YYYY-MM-DD",
-                                    start_date=self.daily_stats_df["measurement_date"].min(),
-                                    end_date=self.daily_stats_df["measurement_date"].max(),
-                                    style={'marginBottom': '20px'}
-                                ),
-                            ], style={
-                                'padding': '20px',
-                                'backgroundColor': '#ffffff',
-                                'borderRadius': '5px',
-                                'boxShadow': '0px 0px 5px rgba(0,0,0,0.1)'
-                            }),
-                            dcc.Graph(id="line-plot"),
-                            dcc.Graph(id="box-plot")
+                            # Control Panel with shadow
+                            dbc.Card([
+                                dbc.CardBody([
+                                    html.H4(
+                                        "Filter Controls",
+                                        className="card-title mb-3",
+                                        style={'color': '#2c3e50'}
+                                    ),
+                                    html.Div([
+                                        html.Label(
+                                            "Location:",
+                                            className="font-weight-bold d-block mb-2",
+                                            style={'color': '#495057'}
+                                        ),
+                                        dcc.Dropdown(
+                                            id="location-dropdown",
+                                            clearable=False,
+                                            multi=False,
+                                            searchable=True,
+                                            options=self.df["location"].unique(),
+                                            value=self.df["location"].unique()[0],
+                                            className="mb-3"
+                                        ),
+                                        html.Label(
+                                            "Parameter:",
+                                            className="font-weight-bold d-block mb-2",
+                                            style={'color': '#495057'}
+                                        ),
+                                        dcc.Dropdown(
+                                            id="parameter-dropdown",
+                                            clearable=False,
+                                            multi=False,
+                                            searchable=True,
+                                            options=self.df["parameter"].unique(),
+                                            value=self.df["parameter"].unique()[0],
+                                            className="mb-3"
+                                        ),
+                                        html.Label(
+                                            "Date Range:",
+                                            className="font-weight-bold d-block mb-2",
+                                            style={'color': '#495057'}
+                                        ),
+                                        dcc.DatePickerRange(
+                                            id="date-picker-range",
+                                            display_format="YYYY-MM-DD",
+                                            start_date=self.daily_stats_df["measurement_date"].min(),
+                                            end_date=self.daily_stats_df["measurement_date"].max(),
+                                            className="mb-3"
+                                        )
+                                    ])
+                                ])
+                            ], className="mb-4 shadow-sm", style={'backgroundColor': '#ffffff'}),
+
+                            # Graphs Container with enhanced cards
+                            dbc.Row([
+                                dbc.Col([
+                                    dbc.Card([
+                                        dbc.CardBody([
+                                            dcc.Graph(id="line-plot")
+                                        ])
+                                    ], className="mb-4 shadow-sm")
+                                ], md=12),
+                                dbc.Col([
+                                    dbc.Card([
+                                        dbc.CardBody([
+                                            dcc.Graph(id="box-plot")
+                                        ])
+                                    ], className="mb-4 shadow-sm")
+                                ], md=12)
+                            ])
                         ], style={'padding': '20px'})
                     ],
                     style={
                         'backgroundColor': '#f8f9fa',
-                        'padding': '10px'
+                        'padding': '10px',
+                        'borderRadius': '5px'
                     },
                     selected_style={
                         'backgroundColor': '#e9ecef',
                         'padding': '10px',
-                        'borderTop': '3px solid #007bff'
+                        'borderTop': '3px solid #007bff',
+                        'borderRadius': '5px'
                     }
                 )
-            ], style={
-                'fontFamily': 'Arial, sans-serif',
-                'margin': '20px'
-            })
+            ], className="mb-4")
         ], style={
-            'backgroundColor': '#f8f9fa',
+            'backgroundColor': '#f0f2f5',
             'minHeight': '100vh',
+            'fontFamily': '"Segoe UI", Arial, sans-serif',
             'padding': '20px'
         })
 

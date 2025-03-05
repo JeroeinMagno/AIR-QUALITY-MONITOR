@@ -1,36 +1,48 @@
 import argparse
 import logging
+from typing import List
 
-from database_manager import (
-    connect_to_database,
-    close_database_connection,
-    execute_query,
-    collect_query_paths,
-    read_query,
-)
+from database_manager import DatabaseManager
 
 
-def transform_data(args) -> None:
+class DataTransformer:
+    def __init__(self, database_path: str, query_directory: str):
+        """Initialize DataTransformer with database and query paths"""
+        self.database_path = database_path
+        self.query_directory = query_directory
+        self.db_manager = DatabaseManager(database_path, query_directory)
+        logging.getLogger().setLevel(logging.INFO)
 
-    database_path = args.database_path
-    con = connect_to_database(path=database_path)
-    query_paths = collect_query_paths(args.query_directory)
-
-    for query_path in query_paths:
-        query = read_query(query_path)
-        execute_query(con, query)
-
-        logging.info(f"Executed query from {query_path}")
-
-    close_database_connection(con)
+    def transform_data(self) -> None:
+        """Execute transformation queries in sequence"""
+        try:
+            # Get all transformation queries
+            query_paths = self.db_manager.collect_query_paths()
+            
+            # Connect to database
+            self.db_manager.connect()
+            
+            # Execute each transformation query
+            for query_path in query_paths:
+                query = self.db_manager.read_query(query_path)
+                self.db_manager.execute_query(query)
+                logging.info(f"Executed transformation query from {query_path}")
+                
+        except Exception as e:
+            logging.error(f"Error during transformation: {str(e)}")
+            raise
+        finally:
+            self.db_manager.close()
 
 
 def main():
-    logging.getLogger().setLevel(logging.INFO)
-
+    # Setup argument parser
     parser = argparse.ArgumentParser(description="CLI for Data Transformation")
     parser.add_argument(
-        "--database_path", type=str, required=True, help="Path to the DuckDB database"
+        "--database_path", 
+        type=str, 
+        required=True, 
+        help="Path to the DuckDB database"
     )
     parser.add_argument(
         "--query_directory",
@@ -39,9 +51,14 @@ def main():
         help="Directory containing SQL transformation queries",
     )
 
+    # Parse arguments and run transformation
     args = parser.parse_args()
-    transform_data(args)
     
+    transformer = DataTransformer(
+        database_path=args.database_path,
+        query_directory=args.query_directory
+    )
+    transformer.transform_data()
 
 
 if __name__ == "__main__":

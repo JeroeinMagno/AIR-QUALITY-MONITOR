@@ -7,71 +7,76 @@ from duckdb import DuckDBPyConnection
 import duckdb as ddb
 
 
-def connect_to_database(path: str) -> DuckDBPyConnection:
-    logging.info(f"Connecting to database at {path}")
-    con = ddb.connect(path)
-    con.sql("""
-        SET s3_access_key_id='';
-        SET s3_secret_access_key='';
-        SET s3_region='';
-        """)
-    return con
+class DatabaseManager:
+    def __init__(self, database_path: str, ddl_query_parent_dir: str = None):
+        self.database_path = database_path
+        self.ddl_query_parent_dir = ddl_query_parent_dir
+        self.connection = None
+        logging.getLogger().setLevel(logging.INFO)
 
+    def connect(self) -> DuckDBPyConnection:
+        """Connect to the database"""
+        logging.info(f"Connecting to database at {self.database_path}")
+        self.connection = ddb.connect(self.database_path)
+        self.connection.sql("""
+            SET s3_access_key_id='';
+            SET s3_secret_access_key='';
+            SET s3_region='';
+            """)
+        return self.connection
 
-def close_database_connection(con: DuckDBPyConnection) -> None:
-    logging.info(f"Closing database connection")
-    con.close()
+    def close(self) -> None:
+        """Close the database connection"""
+        if self.connection:
+            logging.info("Closing database connection")
+            self.connection.close()
+            self.connection = None
 
+    def collect_query_paths(self) -> List[str]:
+        """Collect all SQL query paths"""
+        sql_files = []
+        for root, _, files in os.walk(self.ddl_query_parent_dir):
+            for file in files:
+                if file.endswith(".sql"):
+                    file_path = os.path.join(root, file)
+                    sql_files.append(file_path)
+        
+        logging.info(f"Found {len(sql_files)} sql scripts at location {self.ddl_query_parent_dir}")
+        return sorted(sql_files)
 
-def collect_query_paths(parent_dir: str) -> List[str]:
-    
-    sql_files = []
+    @staticmethod
+    def read_query(path: str) -> str:
+        """Read SQL query from file"""
+        with open(path, "r") as f:
+            query = f.read()
+        return query
 
-    for root, _, files in os.walk(parent_dir):
-        for file in files:
-            if file.endswith(".sql"):
-                file_path = os.path.join(root, file)
-                sql_files.append(file_path)
-    
-    logging.info(f"Found {len(sql_files)} sql scripts at location {parent_dir}")
-    
-    return sorted(sql_files)
+    def execute_query(self, query: str) -> None:
+        """Execute SQL query"""
+        if self.connection:
+            self.connection.execute(query)
 
+    def setup(self) -> None:
+        """Setup the database"""
+        query_paths = self.collect_query_paths()
+        self.connect()
 
-def read_query(path: str) -> str:
-    with open(path, "r") as f:
-        query = f.read()
-        f.close()
-    return query
+        for query_path in query_paths:
+            query = self.read_query(query_path)
+            self.execute_query(query)
+            logging.info(f"Executed query from {query_path}")
+        
+        self.close()
 
-
-def execute_query(con: DuckDBPyConnection, query: str) -> None:
-    con.execute(query)
-
-
-def setup_database(database_path: str, ddl_query_parent_dir: str) -> None:
-    
-    query_paths = collect_query_paths(ddl_query_parent_dir)
-
-    con = connect_to_database(database_path)
-
-    for query_path in query_paths:
-        query = read_query(query_path)
-        execute_query(con, query)
-        logging.info(f"Executed query from {query_path}")
-    
-    close_database_connection(con)
-
-
-def destroy_database(database_path: str) -> None:
-    if os.path.exists(database_path):
-        os.remove(database_path)
+    def destroy(self) -> None:
+        """Destroy the database"""
+        self.close()
+        if os.path.exists(self.database_path):
+            os.remove(self.database_path)
+            logging.info(f"Destroyed database at {self.database_path}")
 
 
 def main():
-
-    logging.getLogger().setLevel(logging.INFO)
-    
     parser = argparse.ArgumentParser(description="CLI tool to setup or destroy a database.")
 
     group = parser.add_mutually_exclusive_group(required=True)
@@ -82,11 +87,17 @@ def main():
     parser.add_argument("--ddl-query-parent-dir", type=str, help="Path to the parent directory of the ddl queries")
 
     args = parser.parse_args()
+    
+    db_manager = DatabaseManager(
+        database_path=args.database_path,
+        ddl_query_parent_dir=args.ddl_query_parent_dir
+    )
 
     if args.create:
-        setup_database(database_path=args.database_path, ddl_query_parent_dir=args.ddl_query_parent_dir)
+        db_manager.setup()
     elif args.destroy:
-        destroy_database(database_path=args.database_path)
+        db_manager.destroy()
+
 
 if __name__ == "__main__":
     main()

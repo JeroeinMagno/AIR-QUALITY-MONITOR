@@ -1,8 +1,10 @@
 {
     "cSpell.words": [
+        "customdata",
         "dateutil",
         "fetchdf",
         "fillna",
+        "hovertemplate",
         "locationid",
         "mapbox",
         "openaq",

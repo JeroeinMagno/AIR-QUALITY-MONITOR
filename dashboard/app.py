@@ -148,6 +148,8 @@ class AirQualityDashboard:
 
     def setup_callbacks(self):
         """Setup all callbacks"""
+        
+        # Map view callback
         @self.app.callback(
             Output("map-view", "figure"),
             Input("map-view", "id")
@@ -155,6 +157,7 @@ class AirQualityDashboard:
         def update_map(_):
             return self.create_map_figure()
 
+        # Dropdown options callback
         @self.app.callback(
             [
                 Output("location-dropdown", "options"),
@@ -164,7 +167,7 @@ class AirQualityDashboard:
                 Output("date-picker-range", "start_date"),
                 Output("date-picker-range", "end_date"),
             ],
-            Input("location-dropdown", "id"),
+            Input("location-dropdown", "id")
         )
         def update_dropdowns(_):
             with duckdb.connect(self.db_path, read_only=True) as db_connection:
@@ -172,25 +175,27 @@ class AirQualityDashboard:
                     "SELECT * FROM presentation.daily_air_quality_stats"
                 ).fetchdf()
 
-            location_options = [
-                {"label": location, "value": location} for location in df["location"].unique()
-            ]
-            parameter_options = [
-                {"label": parameter, "value": parameter}
-                for parameter in df["parameter"].unique()
-            ]
-            start_date = df["measurement_date"].min()
-            end_date = df["measurement_date"].max()
+                location_options = [
+                    {"label": location, "value": location} 
+                    for location in df["location"].unique()
+                ]
+                parameter_options = [
+                    {"label": parameter, "value": parameter}
+                    for parameter in df["parameter"].unique()
+                ]
+                start_date = df["measurement_date"].min()
+                end_date = df["measurement_date"].max()
 
-            return (
-                location_options,
-                df["location"].unique()[0],
-                parameter_options,
-                df["parameter"].unique()[0],
-                start_date,
-                end_date,
-            )
+                return (
+                    location_options,
+                    df["location"].unique()[0],
+                    parameter_options,
+                    df["parameter"].unique()[0],
+                    start_date,
+                    end_date,
+                )
 
+        # Plots callback
         @self.app.callback(
             [Output("line-plot", "figure"), Output("box-plot", "figure")],
             [
@@ -213,9 +218,25 @@ class AirQualityDashboard:
                 & (filtered_df["measurement_date"] <= pd.to_datetime(end_date))
             ]
 
+            def categorize_pm25(value):
+                if value <= 12.0:
+                    return f"{value:.1f} (Good)"
+                elif value <= 35.4:
+                    return f"{value:.1f} (Moderate)"
+                elif value <= 55.4:
+                    return f"{value:.1f} (Unhealthy for Sensitive Groups)"
+                else:
+                    return f"{value:.1f} (Unhealthy)"
+
+            if selected_parameter == "pm25":
+                filtered_df["display_value"] = filtered_df["average_value"].apply(categorize_pm25)
+            else:
+                filtered_df["display_value"] = filtered_df["average_value"]
+
             labels = {
                 "average_value": filtered_df["units"].unique()[0],
-                "measurement_date": "Date"
+                "measurement_date": "Date",
+                "display_value": f"{selected_parameter} Level"
             }
 
             line_fig = px.line(
@@ -223,7 +244,16 @@ class AirQualityDashboard:
                 x="measurement_date",
                 y="average_value",
                 labels=labels,
-                title=f"Plot Over Time of {selected_parameter} Levels"
+                title=f"Plot Over Time of {selected_parameter} Levels",
+                custom_data=["display_value"]
+            )
+            
+            line_fig.update_traces(
+                hovertemplate="<br>".join([
+                    "Date: %{x}",
+                    "Value: %{customdata[0]}",
+                    "<extra></extra>"
+                ])
             )
 
             box_fig = px.box(
@@ -231,7 +261,16 @@ class AirQualityDashboard:
                 x="weekday",
                 y="average_value",
                 labels=labels,
-                title=f"Distribution of {selected_parameter} Levels by Weekday"
+                title=f"Distribution of {selected_parameter} Levels by Weekday",
+                custom_data=["display_value"]
+            )
+            
+            box_fig.update_traces(
+                hovertemplate="<br>".join([
+                    "Weekday: %{x}",
+                    "Value: %{customdata[0]}",
+                    "<extra></extra>"
+                ])
             )
 
             return line_fig, box_fig

@@ -32,10 +32,23 @@ class AirQualityDashboard:
         # Rename columns to match expected names
         self.latest_values_df.rename(columns={"lat": "latitude", "lon": "longitude"}, inplace=True)
 
-    def create_map_figure(self):
-        """Create the map figure"""
+    def create_map_figure(self):  # Fixed indentation - moved outside setup_initial_data
+        """Create the map figure with categorized PM2.5 values"""
         self.latest_values_df.fillna(0, inplace=True)
-        map_fig = px.scatter_map(
+        
+        def categorize_pm25(value):
+            if value <= 12.0:
+                return "Good"
+            elif value <= 35.4:
+                return "Moderate"
+            elif value <= 55.4:
+                return "Unhealthy for Sensitive Groups"
+            else:
+                return "Unhealthy"
+        
+        self.latest_values_df["air_quality_status"] = self.latest_values_df["pm25"].apply(categorize_pm25)
+        
+        map_fig = px.scatter_mapbox(
             self.latest_values_df,
             lat="latitude",
             lon="longitude",
@@ -44,7 +57,7 @@ class AirQualityDashboard:
                 "latitude": True,
                 "longitude": True,
                 "datetime": True,
-                "pm25": True,
+                "air_quality_status": True,
             },
             zoom=6.0
         )
@@ -54,6 +67,7 @@ class AirQualityDashboard:
             title="Air Quality Monitoring Locations"
         )
         return map_fig
+
 
     def setup_layout(self):
         """Setup the dashboard layout"""

@@ -100,9 +100,21 @@ class AirQualityDashboard:
         return map_fig
 
     def setup_layout(self):
-        """Setup the dashboard layout with enhanced styling"""
         self.app.layout = html.Div([
-            # Header with gradient background
+        # Add this interval component at the top of your layout
+        dcc.Interval(
+            id='interval-component',
+            interval=300000,  # 5 minutes in milliseconds
+            n_intervals=0
+        ),
+
+        dbc.Alert(
+            "Last updated: Auto-refresh every 5 minutes",
+            id="refresh-alert",
+            color="info",
+            dismissable=True,
+            className="text-center mb-3"
+        ),
             html.Div([
                 html.H1(
                     "Air Quality Monitoring Dashboard",
@@ -251,14 +263,27 @@ class AirQualityDashboard:
         })
 
     def setup_callbacks(self):
-        """Setup all callbacks"""
-        
+        # Add refresh time callback
+        @self.app.callback(
+            Output("refresh-alert", "children"),
+            Input("interval-component", "n_intervals")
+        )
+        def update_refresh_time(n):
+            return f"Last updated: {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')} (Auto-refresh every 5 minutes)"
+
         # Map view callback
         @self.app.callback(
             Output("map-view", "figure"),
-            Input("map-view", "id")
+            [Input("map-view", "id"),
+             Input("interval-component", "n_intervals")]
         )
-        def update_map(_):
+        def update_map(_, n):
+            # Refresh data from database
+            with duckdb.connect(self.db_path, read_only=True) as db_connection:
+                self.latest_values_df = db_connection.execute(
+                    "SELECT * FROM presentation.latest_param_values_per_location"
+                ).fetchdf()
+                self.latest_values_df.rename(columns={"lat": "latitude", "lon": "longitude"}, inplace=True)
             return self.create_map_figure()
 
         # Dropdown options callback
@@ -271,9 +296,10 @@ class AirQualityDashboard:
                 Output("date-picker-range", "start_date"),
                 Output("date-picker-range", "end_date"),
             ],
-            Input("location-dropdown", "id")
+            [Input("location-dropdown", "id"),
+             Input("interval-component", "n_intervals")]
         )
-        def update_dropdowns(_):
+        def update_dropdowns(_, n):
             with duckdb.connect(self.db_path, read_only=True) as db_connection:
                 df = db_connection.execute(
                     "SELECT * FROM presentation.daily_air_quality_stats"
@@ -299,17 +325,19 @@ class AirQualityDashboard:
                     end_date,
                 )
 
-        # Plots callback
+        # Unified plots callback
         @self.app.callback(
-            [Output("line-plot", "figure"), Output("box-plot", "figure")],
+            [Output("line-plot", "figure"), 
+             Output("box-plot", "figure")],
             [
                 Input("location-dropdown", "value"),
                 Input("parameter-dropdown", "value"),
                 Input("date-picker-range", "start_date"),
-                Input("date-picker-range", "end_date")
+                Input("date-picker-range", "end_date"),
+                Input("interval-component", "n_intervals")
             ]
         )
-        def update_plots(selected_location, selected_parameter, start_date, end_date):
+        def update_plots(selected_location, selected_parameter, start_date, end_date, n):
             with duckdb.connect(self.db_path, read_only=True) as db_connection:
                 daily_stats_df = db_connection.execute(
                     "SELECT * FROM presentation.daily_air_quality_stats"

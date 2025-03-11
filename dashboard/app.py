@@ -93,7 +93,7 @@ class AirQualityDashboard:
             'yanchor': 'top',   # Anchor point at top
             'bgcolor': 'rgba(255, 255, 255, 0.8)',  # Semi-transparent white background
             'bordercolor': '#2c3e50',  # Border color
-            'borderwidth': 1  # Border width
+            'borderwidth': 1  # Border width (changed from 'border')
         }
     )
         

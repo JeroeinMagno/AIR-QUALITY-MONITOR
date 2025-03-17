@@ -6,7 +6,6 @@ import logging
 from duckdb import DuckDBPyConnection
 import duckdb as ddb
 
-
 class DatabaseManager:
     def __init__(self, database_path: str, ddl_query_parent_dir: str = None):
         self.database_path = database_path

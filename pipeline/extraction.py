@@ -13,7 +13,6 @@ from jinja2 import Template
 
 from database_manager import DatabaseManager
 
-
 class DataExtractor:
     def __init__(
         self,
@@ -84,7 +83,6 @@ class DataExtractor:
         
         self.db_manager.close()
 
-
 def main():
     logging.getLogger().setLevel(logging.INFO)
     parser = argparse.ArgumentParser(description="CLI for ELT Extraction")
@@ -136,7 +134,6 @@ def main():
         source_base_path=args.source_base_path
     )
     extractor.extract_data()
-
 
 if __name__ == "__main__":
     main()

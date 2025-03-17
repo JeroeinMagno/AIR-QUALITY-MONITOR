@@ -5,6 +5,7 @@ import plotly.express as px
 import duckdb
 import pandas as pd
 
+gvugvgvui
 class AirQualityDashboard:
     def __init__(self):
         self.app = dash.Dash(

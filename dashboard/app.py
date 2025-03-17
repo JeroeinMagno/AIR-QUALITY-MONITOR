@@ -5,7 +5,6 @@ import plotly.express as px
 import duckdb
 import pandas as pd
 
-gvugvgvui
 class AirQualityDashboard:
     def __init__(self):
         self.app = dash.Dash(
@@ -74,11 +73,11 @@ class AirQualityDashboard:
             "pm25": ":.1f"
         },
         zoom=6.0,
-        size=[15] * len(self.latest_values_df),  # Set uniform size for all markers
-        size_max=15  # Increase maximum marker size
+        size=[15] * len(self.latest_values_df),  # Set uniform size for all markers.
+        size_max=15  # Increase maximum marker size.
     )
         
-        # Update the layout with enhanced styling
+        # Update the layout with enhanced styling.
         map_fig.update_layout(
         mapbox_style="open-street-map",
         height=800,           

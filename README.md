@@ -1,3 +1,33 @@
+
+# AeroSync: Interactive Air Quality Monitoring System
+
+## Table of Contents
+
+- Overview
+- Key Features
+- Acknowledgement
+
+## Overview
+**AeroSync**, is a user-friendly air quality monitoring dashboard that helps users track and assess air conditions. The system collects, processes, and visualizes air quality data through an interactive interface, making it easier to track and evaluate air quality over time.
+
+## Key Features
+- Interactive Air Quality Map & User Interaction  
+- Parameter Analysis Dashboard
+-  Daily Air Quality Statistics
+
+## Acknowledgement
+**Course Instructor.** The researchers would like to express their sincere gratitude to their instructor, Ms. Fatima Marie P. Agdon, MSCS, for her invaluable guidance, support, and encouragement throughout this research. Her expertise and insights have been crucial in shaping the development of AeroSync and ensuring the success of this research study.
+
+**Peers and Colleagues.** The researchers also extend their appreciation to their peers and colleagues for their constructive feedback, insightful discussions, and shared knowledge, which have contributed to the refinement and improvement of this research study.
+
+**Family and Friends.** Furthermore, the researchers are deeply grateful to their families and friends for their unwavering support throughout the research process.
+
+**Research Contributors.** Lastly, appreciation is given to the various researchers, organizations, and data sources that provided essential information on air quality and environmental monitoring, which served as a vital foundation for this study.
+
+With sincere gratitude, the researchers acknowledge all those who have played a part in the success of this research.
+
+
+
 # Setting Up OpenAQ API in Visual Studio Code
 
 ## Prerequisites

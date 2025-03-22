@@ -15,19 +15,6 @@
 - Parameter Analysis Dashboard
 -  Daily Air Quality Statistics
 
-## Acknowledgement
-**Course Instructor.** The researchers would like to express their sincere gratitude to their instructor, Ms. Fatima Marie P. Agdon, MSCS, for her invaluable guidance, support, and encouragement throughout this research. Her expertise and insights have been crucial in shaping the development of AeroSync and ensuring the success of this research study.
-
-**Peers and Colleagues.** The researchers also extend their appreciation to their peers and colleagues for their constructive feedback, insightful discussions, and shared knowledge, which have contributed to the refinement and improvement of this research study.
-
-**Family and Friends.** Furthermore, the researchers are deeply grateful to their families and friends for their unwavering support throughout the research process.
-
-**Research Contributors.** Lastly, appreciation is given to the various researchers, organizations, and data sources that provided essential information on air quality and environmental monitoring, which served as a vital foundation for this study.
-
-With sincere gratitude, the researchers acknowledge all those who have played a part in the success of this research.
-
-
-
 # Setting Up OpenAQ API in Visual Studio Code
 
 ## Prerequisites
@@ -171,6 +158,17 @@ The DuckDB database includes the following schemas and tables:
 3. Make your changes and commit (`git commit -m 'Description of changes'`).
 4. Push to the branch (`git push origin feature-branch`).
 5. Open a pull request.
+
+## Acknowledgement
+**Course Instructor.** The researchers would like to express their sincere gratitude to their instructor, Ms. Fatima Marie P. Agdon, MSCS, for her invaluable guidance, support, and encouragement throughout this research. Her expertise and insights have been crucial in shaping the development of AeroSync and ensuring the success of this research study.
+
+**Peers and Colleagues.** The researchers also extend their appreciation to their peers and colleagues for their constructive feedback, insightful discussions, and shared knowledge, which have contributed to the refinement and improvement of this research study.
+
+**Family and Friends.** Furthermore, the researchers are deeply grateful to their families and friends for their unwavering support throughout the research process.
+
+**Research Contributors.** Lastly, appreciation is given to the various researchers, organizations, and data sources that provided essential information on air quality and environmental monitoring, which served as a vital foundation for this study.
+
+With sincere gratitude, the researchers acknowledge all those who have played a part in the success of this research.
 
 ## License
 This project is licensed under the MIT License. See the `LICENSE` file for more details.

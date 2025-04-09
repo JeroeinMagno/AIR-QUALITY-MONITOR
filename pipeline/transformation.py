@@ -4,7 +4,6 @@ from typing import List
 
 from database_manager import DatabaseManager
 
-
 class DataTransformer:
     def __init__(self, database_path: str, query_directory: str):
         """Initialize DataTransformer with database and query paths"""
@@ -33,7 +32,6 @@ class DataTransformer:
             raise
         finally:
             self.db_manager.close()
-
 
 def main():
     # Setup argument parser

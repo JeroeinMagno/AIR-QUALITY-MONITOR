@@ -15,6 +15,7 @@ class AirQualityDashboard:
         self.setup_initial_data()
         self.setup_layout()
         self.setup_callbacks()
+    
 
     def setup_initial_data(self):
         """Initialize data from database"""
